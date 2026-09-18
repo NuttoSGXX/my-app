@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ตารางคิวเซสชัน D&amp;D</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&amp;family=Cinzel:wght@600&amp;display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0b0708;--panel:#140c0e;--panel2:#1b1013;--line:#3a1a1f;
+  --red:#c8102e;--red-deep:#8f0b20;--red-glow:#ff3b57;
+  --text:#f3e9e9;--muted:#a58f92;--free:#4ade80;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{background:var(--bg)}
+body{
+  margin:0;min-height:100vh;color:var(--text);background-color:var(--bg);
+  background-image:radial-gradient(1100px 480px at 50% -8%,#3b0a15 0%,rgba(59,10,21,0) 62%);
+  background-repeat:no-repeat;
+  font-family:'Sarabun',system-ui,-apple-system,'Segoe UI',Tahoma,sans-serif;
+  line-height:1.4;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 16px 56px}
+.head{text-align:center;margin-bottom:22px}
+.eyebrow{font-family:'Cinzel',Georgia,'Times New Roman',serif;letter-spacing:.32em;text-transform:uppercase;color:var(--red-glow);font-size:12px}
+h1{margin:6px 0 4px;font-size:clamp(26px,5vw,38px);font-weight:700;letter-spacing:.01em}
+.sub{margin:0;color:var(--muted);font-size:14px}
+.owner-banner{
+  margin:0 auto 14px;max-width:560px;text-align:center;font-size:13px;color:#ffd7dd;
+  background:rgba(200,16,46,.14);border:1px solid var(--red-deep);border-radius:14px;padding:10px 14px;
+}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.nav{display:flex;align-items:center;gap:8px}
+.btn{
+  font:inherit;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:9px;
+  padding:8px 14px;cursor:pointer;transition:border-color .15s,background .15s;
+}
+.btn:hover{border-color:var(--red);background:var(--panel2)}
+.btn:focus-visible,.day:focus-visible,.seg button:focus-visible,input:focus-visible{outline:2px solid var(--red-glow);outline-offset:2px}
+.btn.icon{width:40px;padding:8px 0;font-size:18px;line-height:1}
+.mtitle{font-size:clamp(20px,3.6vw,26px);font-weight:700;min-width:190px;text-align:center}
+.mtitle .ce{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px}
+.legend{display:flex;gap:14px;font-size:13px;color:var(--muted);align-items:center}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.legend .lf i{background:var(--free)}
+.legend .lb i{background:var(--red)}
+.cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wd{text-align:center;color:var(--muted);font-size:13px;padding:6px 0;font-weight:600}
+.blank{min-height:0}
+.day{
+  background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px;
+  display:flex;flex-direction:column;gap:7px;min-height:170px;
+}
+.day.today{border-color:var(--red);box-shadow:0 0 0 1px var(--red),0 0 18px rgba(255,59,87,.22)}
+.day.past{opacity:.5}
+.day.editable{cursor:pointer;transition:transform .12s,border-color .12s}
+.day.editable:hover{border-color:var(--red);transform:translateY(-1px)}
+.dnum{display:flex;justify-content:space-between;align-items:baseline}
+.dnum .n{font-weight:700;font-size:16px}
+.day.today .dnum .n{color:var(--red-glow)}
+.dwd{display:none;color:var(--muted);font-size:13px}
+.slots{display:grid;gap:5px}
+.slot{border-radius:8px;padding:5px 8px;border:1px solid transparent;font-size:12px}
+.slot .lbl{display:block;font-size:10.5px;color:var(--muted);white-space:nowrap}
+.slot .st{display:block;font-weight:600;font-size:13px;overflow-wrap:anywhere}
+.slot.free{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.22)}
+.slot.free .st{color:var(--free)}
+.slot.busy{background:linear-gradient(135deg,#7d0a1e,#4a0612);border-color:var(--red)}
+.slot.busy .lbl{color:#f2b8c0}
+.slot.busy .st{color:#fff}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.74);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal{
+  width:min(540px,100%);max-height:92vh;overflow:auto;background:var(--panel2);
+  border:1px solid var(--red-deep);border-radius:16px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.6);
+}
+.modal h2{margin:0;font-size:20px}
+.msub{color:var(--muted);font-size:14px;margin:2px 0 12px}
+.quick{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px}
+.quick .btn{padding:6px 12px;font-size:13px}
+.mrow{padding:12px 0;border-top:1px solid var(--line)}
+.mh{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.mh .mt{color:var(--muted);font-size:13px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.seg button{font:inherit;font-size:13px;color:var(--muted);background:transparent;border:0;padding:6px 14px;cursor:pointer}
+.seg button.on.sf{background:rgba(74,222,128,.16);color:var(--free)}
+.seg button.on.sb{background:var(--red);color:#fff}
+.mrow input{
+  width:100%;font:inherit;color:var(--text);background:#0d0709;border:1px solid var(--line);
+  border-radius:9px;padding:9px 11px;margin-top:8px;
+}
+.mrow input:disabled{opacity:.35}
+.mrow input::placeholder{color:#6f5a5d}
+.actions{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+.btn.primary{background:var(--red);border-color:var(--red);color:#fff;font-weight:600}
+.btn.primary:hover{background:var(--red-glow);border-color:var(--red-glow)}
+.btn:disabled{opacity:.5;cursor:default}
+.toast{
+  position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:60;
+  background:var(--panel2);border:1px solid var(--red);color:var(--text);
+  padding:10px 16px;border-radius:10px;font-size:14px;max-width:calc(100% - 32px);
+}
+
+.owner-banner.dirty{border-color:var(--red-glow);background:rgba(200,16,46,.26)}
+.ob-acts{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.owner-banner .btn{padding:6px 12px;font-size:13px}
+.owner-banner .link{font:inherit;color:#fff;background:transparent;border:0;border-bottom:1px solid #ff8fa0;cursor:pointer;padding:0 2px;margin-left:8px}
+.foot{margin-top:30px;text-align:left}
+.credit{font-family:'Cinzel',Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:.22em;color:#6f5a5d;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+.pin{width:100%;font:inherit;font-size:22px;text-align:center;letter-spacing:.4em;color:var(--text);background:#0d0709;border:1px solid var(--line);border-radius:9px;padding:10px;margin-top:12px}
+@media (max-width:760px){
+  .wd,.blank{display:none}
+  .cal{grid-template-columns:1fr}
+  .day{min-height:0}
+  .dwd{display:inline}
+  .slots{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .bar{justify-content:center}
+}
+@media (max-width:520px){
+  .slots{grid-template-columns:1fr}
+  .legend{width:100%;justify-content:center}
+}
+
+.notice{text-align:center;color:var(--muted);padding:60px 16px}
+.notice .btn{margin-top:12px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(function(){
+  var SLOTS=[
+    {k:'m',name:'เช้า',time:'06:00–12:00'},
+    {k:'a',name:'บ่าย',time:'13:00–18:00'},
+    {k:'e',name:'ค่ำ',time:'19:00–00:00'}
+  ];
+  var MONTHS=['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+  var WD=['อา.','จ.','อ.','พ.','พฤ.','ศ.','ส.'];
+  var WDFULL=['อาทิตย์','จันทร์','อังคาร','พุธ','พฤหัสบดี','ศุกร์','เสาร์'];
+  var API='/api/schedule';
+
+  var root=document.getElementById('root');
+  var state={days:{}};
+  var loaded=false, loadError=false;
+  var pin=null, isOwner=false;
+  try{pin=sessionStorage.getItem('pin');}catch(e){}
+
+  var now=new Date();
+  function pad(n){return n<10?'0'+n:''+n;}
+  function key(y,m,d){return y+'-'+pad(m+1)+'-'+pad(d);}
+  var todayKey=key(now.getFullYear(),now.getMonth(),now.getDate());
+
+  var view=null;
+  try{view=JSON.parse(sessionStorage.getItem('view'));}catch(e){view=null;}
+  if(!view||typeof view.y!=='number'||typeof view.m!=='number'){view={y:now.getFullYear(),m:now.getMonth()};}
+
+  function el(tag,cls,text){
+    var n=document.createElement(tag);
+    if(cls){n.className=cls;}
+    if(text!==undefined&&text!==null){n.textContent=text;}
+    return n;
+  }
+  function btn(label,cls,fn,aria){
+    var b=el('button','btn '+(cls||''),label);
+    b.type='button';
+    if(aria){b.setAttribute('aria-label',aria);}
+    b.addEventListener('click',fn);
+    return b;
+  }
+  function saveView(){try{sessionStorage.setItem('view',JSON.stringify(view));}catch(e){}}
+  function go(delta){
+    var d=new Date(view.y,view.m+delta,1);
+    view={y:d.getFullYear(),m:d.getMonth()};
+    saveView();render();
+  }
+  function goToday(){
+    view={y:now.getFullYear(),m:now.getMonth()};
+    saveView();render();
+  }
+  var toastTimer=null;
+  function toast(msg){
+    var old=document.querySelector('.toast');
+    if(old){old.remove();}
+    var t=el('div','toast',msg);
+    t.setAttribute('role','status');
+    document.body.appendChild(t);
+    clearTimeout(toastTimer);
+    toastTimer=setTimeout(function(){t.remove();},3600);
+  }
+
+  async function api(body){
+    var r=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    var j={};
+    try{j=await r.json();}catch(e){}
+    return {status:r.status,body:j};
+  }
+  async function load(){
+    try{
+      var r=await fetch(API,{cache:'no-store'});
+      if(!r.ok){throw new Error('bad status');}
+      var j=await r.json();
+      state={days:(j&&j.days&&typeof j.days==='object')?j.days:{}};
+      loaded=true;loadError=false;
+      render();
+    }catch(e){
+      if(!loaded){loadError=true;render();}
+    }
+  }
+  function clearPin(){pin=null;isOwner=false;try{sessionStorage.removeItem('pin');}catch(e){}}
+  function exitAdmin(){clearPin();render();}
+
+  function recentNotes(){
+    var count={};
+    Object.keys(state.days).forEach(function(dk){
+      var day=state.days[dk];
+      Object.keys(day).forEach(function(k){
+        var v=day[k];
+        if(v){count[v]=(count[v]||0)+1;}
+      });
+    });
+    return Object.keys(count).sort(function(a,b){return count[b]-count[a];}).slice(0,12);
+  }
+
+  function render(){
+    root.textContent='';
+    var y=view.y,m=view.m;
+    var wrap=el('div','wrap');
+
+    var head=el('header','head');
+    head.appendChild(el('div','eyebrow','Dungeons & Dragons'));
+    head.appendChild(el('h1','','ตารางคิวเซสชัน'));
+    head.appendChild(el('p','sub','ดูวันและช่วงเวลาที่ว่างในแต่ละเดือน'));
+    wrap.appendChild(head);
+
+    if(!loaded){
+      var nt=el('div','notice');
+      if(loadError){
+        nt.appendChild(el('div','','โหลดตารางไม่สำเร็จ'));
+        nt.appendChild(btn('ลองอีกครั้ง','',function(){loadError=false;render();load();}));
+      }else{
+        nt.appendChild(el('div','','กำลังโหลดตาราง…'));
+      }
+      wrap.appendChild(nt);
+      wrap.appendChild(footer());
+      root.appendChild(wrap);
+      return;
+    }
+
+    if(isOwner){
+      var ob=el('div','owner-banner');
+      ob.appendChild(el('div','','โหมดผู้ดูแล — คลิกที่วันเพื่อแก้ไข บันทึกแล้วลูกค้าเห็นทันที'));
+      var acts=el('div','ob-acts');
+      acts.appendChild(btn('ออกจากโหมดแก้ไข','',exitAdmin));
+      ob.appendChild(acts);
+      wrap.appendChild(ob);
+    }
+
+    var bar=el('div','bar');
+    var nav=el('div','nav');
+    nav.appendChild(btn('‹','icon',function(){go(-1);},'เดือนก่อนหน้า'));
+    var mt=el('div','mtitle',MONTHS[m]+' '+(y+543));
+    mt.appendChild(el('span','ce','('+y+')'));
+    nav.appendChild(mt);
+    nav.appendChild(btn('›','icon',function(){go(1);},'เดือนถัดไป'));
+    bar.appendChild(nav);
+    bar.appendChild(btn('วันนี้','',goToday));
+    var lg=el('div','legend');
+    var l1=el('span','lf');l1.appendChild(document.createElement('i'));l1.appendChild(document.createTextNode('ว่าง'));
+    var l2=el('span','lb');l2.appendChild(document.createElement('i'));l2.appendChild(document.createTextNode('ไม่ว่าง / มีคิว'));
+    lg.appendChild(l1);lg.appendChild(l2);
+    bar.appendChild(lg);
+    wrap.appendChild(bar);
+
+    var cal=el('div','cal');
+    WD.forEach(function(w){cal.appendChild(el('div','wd',w));});
+    var first=new Date(y,m,1).getDay();
+    for(var i=0;i<first;i++){cal.appendChild(el('div','blank'));}
+    var total=new Date(y,m+1,0).getDate();
+    for(var d=1;d<=total;d++){cal.appendChild(dayCell(y,m,d));}
+    wrap.appendChild(cal);
+    wrap.appendChild(footer());
+    root.appendChild(wrap);
+  }
+
+  function footer(){
+    var foot=el('footer','foot');
+    var cr=el('span','credit','BY DM BANK');
+    cr.addEventListener('click',onCreditTap);
+    foot.appendChild(cr);
+    return foot;
+  }
+
+  var taps=0,tapTimer=null;
+  function onCreditTap(){
+    if(isOwner){return;}
+    taps++;
+    clearTimeout(tapTimer);
+    tapTimer=setTimeout(function(){taps=0;},2500);
+    if(taps>=8){taps=0;clearTimeout(tapTimer);openPin();}
+  }
+
+  function openPin(){
+    var ov=el('div','ov');
+    var md=el('div','modal');
+    md.setAttribute('role','dialog');md.setAttribute('aria-modal','true');
+    ov.appendChild(md);
+    md.appendChild(el('h2','','รหัสผู้ดูแล'));
+    var input=document.createElement('input');
+    input.type='password';input.className='pin';input.maxLength=32;
+    input.setAttribute('inputmode','numeric');
+    input.setAttribute('autocomplete','off');
+    input.setAttribute('aria-label','รหัสผู้ดูแล');
+    md.appendChild(input);
+    var actions=el('div','actions');
+    function onKey(e){if(e.key==='Escape'){close();}}
+    function close(){document.removeEventListener('keydown',onKey);ov.remove();}
+    var busy=false;
+    var cancel=btn('ยกเลิก','',close);
+    var ok=btn('เข้าสู่โหมดแก้ไข','primary',submit);
+    async function submit(){
+      if(busy){return;}
+      busy=true;ok.disabled=true;cancel.disabled=true;
+      try{
+        var r=await api({pin:input.value,action:'check'});
+        if(r.status===200){
+          pin=input.value;
+          try{sessionStorage.setItem('pin',pin);}catch(e){}
+          isOwner=true;close();render();return;
+        }else if(r.status===401){
+          toast('รหัสไม่ถูกต้อง');input.value='';
+        }else if(r.status===429){
+          toast('ลองผิดหลายครั้งเกินไป รอสักครู่แล้วลองใหม่');
+        }else{
+          toast('ระบบยังไม่พร้อม ตรวจสอบการตั้งค่าบนเซิร์ฟเวอร์');
+        }
+      }catch(e){
+        toast('เชื่อมต่อไม่ได้ ลองอีกครั้ง');
+      }
+      busy=false;ok.disabled=false;cancel.disabled=false;input.focus();
+    }
+    actions.appendChild(cancel);
+    actions.appendChild(ok);
+    md.appendChild(actions);
+    input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();submit();}});
+    ov.addEventListener('click',function(e){if(e.target===ov){close();}});
+    document.addEventListener('keydown',onKey);
+    document.body.appendChild(ov);
+    setTimeout(function(){input.focus();},0);
+  }
+
+  function dayCell(y,m,d){
+    var dk=key(y,m,d);
+    var wdIdx=new Date(y,m,d).getDay();
+    var cell=el('div','day');
+    if(dk===todayKey){cell.classList.add('today');}
+    if(dk<todayKey){cell.classList.add('past');}
+    var dn=el('div','dnum');
+    dn.appendChild(el('span','n',String(d)));
+    dn.appendChild(el('span','dwd','วัน'+WDFULL[wdIdx]));
+    cell.appendChild(dn);
+    var slots=el('div','slots');
+    var cur=state.days[dk]||{};
+    SLOTS.forEach(function(s){
+      var v=cur[s.k];
+      var busy=(v!==undefined&&v!==null);
+      var sl=el('div','slot '+(busy?'busy':'free'));
+      sl.appendChild(el('span','lbl',s.name+' '+s.time));
+      sl.appendChild(el('span','st',busy?(v||'ไม่ว่าง'):'ว่าง'));
+      slots.appendChild(sl);
+    });
+    cell.appendChild(slots);
+    if(isOwner){
+      cell.classList.add('editable');
+      cell.tabIndex=0;
+      cell.setAttribute('role','button');
+      cell.setAttribute('aria-label','แก้ไขวันที่ '+d+' '+MONTHS[m]);
+      cell.addEventListener('click',function(){openEditor(dk,y,m,d,wdIdx);});
+      cell.addEventListener('keydown',function(e){
+        if(e.key==='Enter'||e.key===' '){e.preventDefault();openEditor(dk,y,m,d,wdIdx);}
+      });
+    }
+    return cell;
+  }
+
+  function openEditor(dk,y,m,d,wd){
+    var cur=state.days[dk]||{};
+    var draft={};
+    SLOTS.forEach(function(s){
+      var v=cur[s.k];
+      draft[s.k]={busy:(v!==undefined&&v!==null),note:v||''};
+    });
+
+    var ov=el('div','ov');
+    var md=el('div','modal');
+    md.setAttribute('role','dialog');
+    md.setAttribute('aria-modal','true');
+    ov.appendChild(md);
+    md.appendChild(el('h2','',d+' '+MONTHS[m]+' '+(y+543)));
+    md.appendChild(el('div','msub','วัน'+WDFULL[wd]));
+
+    var dl=document.createElement('datalist');
+    dl.id='notes-list';
+    recentNotes().forEach(function(n){var o=document.createElement('option');o.value=n;dl.appendChild(o);});
+    md.appendChild(dl);
+
+    var rows={};
+    function sync(){
+      SLOTS.forEach(function(s){
+        var r=rows[s.k],dr=draft[s.k];
+        r.bF.classList.toggle('on',!dr.busy);
+        r.bB.classList.toggle('on',dr.busy);
+        r.bF.setAttribute('aria-pressed',String(!dr.busy));
+        r.bB.setAttribute('aria-pressed',String(dr.busy));
+        r.input.disabled=!dr.busy;
+        r.input.value=dr.note;
+      });
+    }
+
+    var quick=el('div','quick');
+    quick.appendChild(btn('ไม่ว่างทั้งวัน','',function(){SLOTS.forEach(function(s){draft[s.k].busy=true;});sync();}));
+    quick.appendChild(btn('ว่างทั้งวัน','',function(){SLOTS.forEach(function(s){draft[s.k].busy=false;draft[s.k].note='';});sync();}));
+    md.appendChild(quick);
+
+    SLOTS.forEach(function(s){
+      var row=el('div','mrow');
+      var mh=el('div','mh');
+      var left=el('div');
+      left.appendChild(el('strong','',s.name));
+      left.appendChild(document.createTextNode(' '));
+      left.appendChild(el('span','mt',s.time));
+      mh.appendChild(left);
+      var seg=el('div','seg');
+      var bF=el('button','sf','ว่าง');bF.type='button';
+      var bB=el('button','sb','ไม่ว่าง');bB.type='button';
+      seg.appendChild(bF);seg.appendChild(bB);
+      mh.appendChild(seg);
+      row.appendChild(mh);
+      var input=document.createElement('input');
+      input.type='text';input.maxLength=80;
+      input.placeholder='หมายเหตุ เช่น OoTA';
+      input.setAttribute('list','notes-list');
+      input.setAttribute('aria-label','หมายเหตุช่วง'+s.name);
+      row.appendChild(input);
+      md.appendChild(row);
+      rows[s.k]={bF:bF,bB:bB,input:input};
+      bF.addEventListener('click',function(){draft[s.k].busy=false;draft[s.k].note='';sync();});
+      bB.addEventListener('click',function(){draft[s.k].busy=true;sync();input.focus();});
+      input.addEventListener('input',function(){draft[s.k].note=input.value;});
+      input.addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();doSave();}});
+    });
+
+    var actions=el('div','actions');
+    var cancel=btn('ยกเลิก','',close);
+    var save=btn('บันทึก','primary',doSave);
+    actions.appendChild(cancel);actions.appendChild(save);
+    md.appendChild(actions);
+
+    function onKey(e){if(e.key==='Escape'){close();}}
+    function close(){document.removeEventListener('keydown',onKey);ov.remove();}
+    ov.addEventListener('click',function(e){if(e.target===ov){close();}});
+    document.addEventListener('keydown',onKey);
+
+    var busyNow=false;
+    async function doSave(){
+      if(busyNow){return;}
+      busyNow=true;save.disabled=true;cancel.disabled=true;save.textContent='กำลังบันทึก…';
+      var entry={};
+      SLOTS.forEach(function(s){
+        if(draft[s.k].busy){entry[s.k]=String(draft[s.k].note||'').trim().slice(0,80);}
+      });
+      try{
+        var r=await api({pin:pin,date:dk,slots:entry});
+        if(r.status===200){
+          if(Object.keys(entry).length){state.days[dk]=entry;}else{delete state.days[dk];}
+          close();render();toast('บันทึกแล้ว');return;
+        }else if(r.status===401){
+          clearPin();close();render();toast('รหัสไม่ถูกต้อง เข้าโหมดแก้ไขใหม่อีกครั้ง');return;
+        }else if(r.status===429){
+          toast('ลองผิดหลายครั้งเกินไป รอสักครู่แล้วลองใหม่');
+        }else{
+          toast('บันทึกไม่สำเร็จ ลองอีกครั้ง');
+        }
+      }catch(e){
+        toast('เชื่อมต่อไม่ได้ ลองอีกครั้ง');
+      }
+      busyNow=false;save.disabled=false;cancel.disabled=false;save.textContent='บันทึก';
+    }
+
+    document.body.appendChild(ov);
+    sync();
+    setTimeout(function(){var b=md.querySelector('.quick button');if(b){b.focus();}},0);
+  }
+
+  // start
+  render();
+  load().then(async function(){
+    if(pin&&loaded){
+      try{
+        var r=await api({pin:pin,action:'check'});
+        if(r.status===200){isOwner=true;render();}else{clearPin();}
+      }catch(e){}
+    }
+  });
+  // keep the page fresh for customers
+  setInterval(function(){if(!document.hidden){load();}},60000);
+  document.addEventListener('visibilitychange',function(){if(!document.hidden){load();}});
+})();
+
+</script>
+</body>
+</html>
